@@ -15,8 +15,10 @@ export class UsersService {
                 private readonly rolesRepository: RolesRepository) {}
 
     async createUser(userData: CreateUserInputModel): Promise<CreateUserViewModel> {
-        const user = await this.usersRepository.createUsers(userData)
-        const userWithRoles = await this.usersRepository.getUserWithRolesById(user.id)
+        const newUser = new UsersEntity()
+        Object.assign(newUser, userData)
+        const userFromDataBase = await this.usersRepository.createUsers(newUser)
+        const userWithRoles = await this.usersRepository.getUserWithRolesById(userFromDataBase.id)
         const roleByName = await this.rolesRepository.getRoleByName('USER')
   
         userWithRoles.userRoles.push(roleByName)
@@ -57,12 +59,6 @@ export class UsersService {
         const user = await this.usersRepository.getUserWithRolesById(userData.id);
         const role = await this.rolesRepository.getRoleByName(userData.rolename);
 
-        user.userRoles.filter((role) => {
-            if (role.role === userData.rolename) {
-                throw new HttpException('Такая роль уже добавлена', HttpStatus.BAD_REQUEST)
-            }
-        })
-
         if(!user) {
             throw new HttpException('Такой пользователь не найден', HttpStatus.BAD_REQUEST)
         }
@@ -71,8 +67,13 @@ export class UsersService {
             throw new HttpException('Такой роли не существует', HttpStatus.BAD_REQUEST)
         }
 
-        user.userRoles.push(role)
+        user.userRoles.filter((role) => {
+            if (role.role === userData.rolename) {
+                throw new HttpException('Такая роль уже добавлена', HttpStatus.BAD_REQUEST)
+            }
+        })
 
+        user.userRoles.push(role)
         const updateUserWithRoles = await this.usersRepository.createUsers(user)
         return this.buildResponse(updateUserWithRoles)
     }

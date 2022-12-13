@@ -13,11 +13,11 @@ import { UsersModule } from './users/users.module';
 
 @Module({
   imports: [
+    TypeOrmModule.forRootAsync(TypeOrmConfigService()),
     ConfigModule.forRoot({
       envFilePath: `.${process.env.NODE_ENV}.env`,
       isGlobal: true,
     }),
-    TypeOrmModule.forRootAsync(TypeOrmConfigService()),
     UsersModule,
     RolesModule,
     AuthModule,
