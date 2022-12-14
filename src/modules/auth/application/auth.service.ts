@@ -8,7 +8,7 @@ import { LoginUserInputModel } from '../api/models/loginUser.model';
 import { UsersRepository } from '../../users/infrastructure/users.repository';
 import { Tokens } from './dto/tokens-view-model.dto';
 import { SessionsService } from '../../sessions/application/sessions.service';
-import { SessionsEntity } from '../../sessions/domain/entity/sessions.entity';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class AuthService {
@@ -16,7 +16,8 @@ export class AuthService {
     constructor(private readonly usersService: UsersService,
                 private readonly jwtService: JwtService,
                 private readonly usersRepository: UsersRepository,
-                private readonly sessionsService: SessionsService) {}
+                private readonly sessionsService: SessionsService,
+                private readonly configService: ConfigService) {}
 
     async register(userData: RegisterUserInputModel): Promise<Tokens> {
 
@@ -59,6 +60,10 @@ export class AuthService {
 
         await this.updateRefreshToken(user, tokens)
 
+        if (user.refresh_token) {
+            await this.sessionsService.saveUsedToken(user.refresh_token)
+        }
+
         return tokens
     }
 
@@ -79,6 +84,7 @@ export class AuthService {
         await this.checkToken(token)
         const userFromRequest = await this.decodeToken(token)
         const user = await this.usersRepository.getUserWithRolesById(userFromRequest.id);
+        
 
         if (!user) {
             throw new UnauthorizedException('Такого пользователя не существует')
@@ -89,8 +95,12 @@ export class AuthService {
         if(!isRefreshTokensEquel) {
             throw new UnauthorizedException('Токены не совпадают')
         }
-        
+
         const tokens = await this.generateToken(user);
+        // const tokens2 = await this.generateToken(user);
+        // const tokens3 = await this.generateToken(user);
+        // const tokens4 = await this.generateToken(user);
+
         await this.updateRefreshToken(user, tokens)
         await this.sessionsService.saveUsedToken(token)
 
@@ -102,7 +112,7 @@ export class AuthService {
             const user = await this.jwtService.verify(token, {
                 secret: process.env.PRIVATE_REFRESH_KEY
             })
-            return user.payload;
+            return user;
         } catch (err) {
             console.log(err)
             throw new UnauthorizedException()
@@ -114,18 +124,35 @@ export class AuthService {
         await this.usersService.createUser({...user, refresh_token: hashToken})
     }
 
-    async generateToken(user: RegisterUserViewModel): Promise<Tokens> {
+    async generateToken(user: RegisterUserViewModel) {
+        
         const payload = { id: user.id, username: user.username, email: user.email, roles: user.userRoles}
+            // const access_token = await this.jwtService.sign({payload}, {
+            //     secret:  this.configService.get<string>('PRIVATE_ACCESS_KEY'),
+            //     expiresIn: '15m'
+            // })
+            // const refresh_token = await this.jwtService.sign({payload}, {
+            //     secret:  this.configService.get<string>('PRIVATE_REFRESH_KEY'),
+            //     expiresIn: '168h'
+            // })
+            const [access_token, refresh_token] = await Promise.all([
+                this.jwtService.signAsync(payload, {
+                  secret: this.configService.get<string>('PRIVATE_ACCESS_KEY'),
+                  expiresIn: '15m',
+                }),
+          
+                this.jwtService.signAsync(payload, {
+                  secret: this.configService.get<string>('PRIVATE_REFRESH_KEY'),
+                  expiresIn: '168h',
+                }),
+              ]);
+            //   console.log( {
+            //     access_token, refresh_token
+            //   })
 
-            return {
-                access_token: await this.jwtService.sign({payload}, {
-                    secret: process.env.PRIVATE_ACCESS_KEY,
-                    expiresIn: '15m'
-                }),
-                refresh_token: await this.jwtService.sign({payload}, {
-                    secret: process.env.PRIVATE_REFRESH_KEY,
-                    expiresIn: '168h'
-                }),
+        return {
+            access_token,
+            refresh_token
         }
     }
 

@@ -8,11 +8,11 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 
 
 dotenv.config({
-  path: '.env',
+  path: `.${process.env.NODE_ENV}.env`,
 });
 
 
-console.log(process.env.PG_DATABASE)
+// console.log(process.env.PG_DATABASE)
 // console.log(`.${process.env.NODE_ENV}.env`)
 export const config: DataSourceOptions = {
   type: 'postgres',
@@ -24,18 +24,3 @@ export const config: DataSourceOptions = {
   entities: [RolesEntity, SessionsEntity, UsersEntity],
   synchronize: true,
 };
-
-// export const TypeOrmConfigService = (): TypeOrmModuleAsyncOptions => ({
-//   useFactory: (configService: ConfigService) => ({
-//     type: 'postgres',
-//     host: configService.get('PG_HOST'),
-//     port: +configService.get('PG_PORT'),
-//     username: configService.get('PG_USERNAME'),
-//     password: configService.get('PG_PASSWORD'),
-//     database: configService.get('PG_DATABASE'),
-//     entities: [UsersEntity, RolesEntity, SessionsEntity],
-//     synchronize: true,
-//   }),
-//   inject: [ConfigService],
-//   imports: [ConfigModule],
-// });
