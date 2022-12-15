@@ -16,7 +16,7 @@ describe('AppController (e2e)', () => {
     await truncateDBTables(app);
     await app.close();
   });
-  // jest.setTimeout(10000)
+  jest.setTimeout(15000)
   describe('Registration | Login | Refresh | Logout', () => {
 
     const requestRegisterUser: CreateUserInputModel = {
@@ -54,7 +54,6 @@ describe('AppController (e2e)', () => {
       );
       access_token_user = access_token
       refresh_token_user = refresh_token
-      // console.log('reg', refresh_token_user)
 
       return response
     })
@@ -79,7 +78,6 @@ describe('AppController (e2e)', () => {
    
          access_token_user = access_token
          refresh_token_user = refresh_token
-         console.log(refresh_token_user)
 
 
          await new Promise(resolve => setTimeout(resolve, 3000)); // делаю задержку перед следующим тестом из-за функции generateToken. При быстрой повторной отправки токены генерируются одинаковые!
@@ -110,7 +108,6 @@ describe('AppController (e2e)', () => {
     
         access_token_user = access_token
         refresh_token_user = refresh_token
-        console.log(refresh_token_user)
 
         return response
     });
@@ -127,15 +124,5 @@ describe('AppController (e2e)', () => {
     });
 
   })
-  
-  // describe('Registration | Login | Refresh | Logout', () => {
-  // it('/logout = should return string [POST -> 201]', async () => {
-  //   await request(app.getHttpServer())
-  //   .post('/logout')
-  //   .set('Authorization', `Bearer ${access_token_user}`)
-  //   .set('Cookie', refresh_token_user)
-  //   .expect(201)
-  //   // .expect('Вы успешно вышли из системы.')
-  // });
 
 })

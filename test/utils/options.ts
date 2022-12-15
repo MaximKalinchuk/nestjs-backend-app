@@ -3,8 +3,6 @@ import { RolesEntity } from '../../src/modules/roles/domain/entity/roles.entity'
 import { SessionsEntity } from '../../src/modules/sessions/domain/entity/sessions.entity';
 import { UsersEntity } from '../../src/modules/users/domain/entity/users.entity';
 import * as dotenv from 'dotenv';
-import { TypeOrmModuleAsyncOptions } from '@nestjs/typeorm';
-import { ConfigModule, ConfigService } from '@nestjs/config';
 
 
 dotenv.config({
