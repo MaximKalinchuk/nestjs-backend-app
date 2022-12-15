@@ -13,7 +13,7 @@ export class AuthLogoutUseCase {
                 private readonly sessionsService: SessionsService,) {}
 
     async execute(token: string): Promise<void> {
-        await this.authService.checkToken(token)
+        await this.authService.checkTokenInDataBase(token)
         const userFromRequest = await this.authService.decodeToken(token)
         const user = await this.usersRepository.getUserWithRolesById(userFromRequest.id);
         if (!user) {

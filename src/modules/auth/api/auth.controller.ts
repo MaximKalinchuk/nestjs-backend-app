@@ -47,9 +47,7 @@ export class AuthController {
     @Post('refresh')
     async refresh(@Req() req: Request, @Res({passthrough: true}) res: Response): Promise<Omit<Tokens, "refresh_token">> {
         const refresh_token = req.cookies.refresh_token
-        // console.log('1', refresh_token)
         const tokens = await this.authRefreshUseCase.execute(refresh_token);
-        // console.log('2', tokens.refresh_token)
         res.cookie('refresh_token', tokens.refresh_token, {
             maxAge: 3600 * 24 * 30,
             httpOnly: true

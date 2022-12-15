@@ -16,7 +16,7 @@ describe('AppController (e2e)', () => {
     await truncateDBTables(app);
     await app.close();
   });
-  jest.setTimeout(15000)
+
   describe('Registration | Login | Refresh | Logout', () => {
 
     const requestRegisterUser: CreateUserInputModel = {

@@ -7,14 +7,25 @@ import { UsersRepository } from './infrastructure/users.repository';
 import { RolesModule } from '../roles/roles.module';
 import { AuthModule } from '../auth/auth.module';
 import { JwtModule } from '@nestjs/jwt';
+import { GiveBanUseCase } from './application/useCases/giveBan.use-case';
+import { GiveRoleUseCase } from './application/useCases/giveRole.use-case';
+import { CreateUserUseCase } from './application/useCases';
+import { GetUsersUseCase } from './application/useCases/getUsers.use-case';
+
+const useCases = [
+    CreateUserUseCase,
+    GiveBanUseCase,
+    GiveRoleUseCase,
+    GetUsersUseCase,
+]
 
 @Module({
     imports: [
         TypeOrmModule.forFeature([UsersEntity]),
         RolesModule, JwtModule, forwardRef(() => AuthModule) 
     ],
-    providers: [UsersService, UsersRepository],
     controllers: [UsersController],
-    exports: [UsersService, UsersRepository]
+    providers: [UsersService, UsersRepository, ...useCases],
+    exports: [UsersService, UsersRepository, CreateUserUseCase]
 })
 export class UsersModule {}

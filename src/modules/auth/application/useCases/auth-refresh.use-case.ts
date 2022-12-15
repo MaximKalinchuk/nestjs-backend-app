@@ -14,7 +14,7 @@ export class AuthRefreshUseCase {
                 private readonly sessionsService: SessionsService,) {}
 
     async execute(token: string): Promise<Tokens> {
-        await this.authService.checkToken(token)
+        await this.authService.checkTokenInDataBase(token)
         const userFromRequest = await this.authService.decodeToken(token)
         const user = await this.usersRepository.getUserWithRolesById(userFromRequest.id);
         
@@ -31,7 +31,7 @@ export class AuthRefreshUseCase {
 
         const tokens = await this.authService.generateToken(user);
 
-        await this.authService.updateRefreshToken(user, tokens)
+        await this.authService.updateRefreshTokenInDataBase(user, tokens)
         await this.sessionsService.saveUsedToken(token)
 
         return tokens

@@ -31,7 +31,7 @@ export class AuthLoginUseCase {
 
         const tokens = await this.authService.generateToken(user)
 
-        await this.authService.updateRefreshToken(user, tokens)
+        await this.authService.updateRefreshTokenInDataBase(user, tokens)
 
         if (user.refresh_token) {
             await this.sessionsService.saveUsedToken(user.refresh_token)

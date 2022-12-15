@@ -6,6 +6,7 @@ import { hash } from 'bcryptjs';
 import { Tokens } from './dto/tokens-view-model.dto';
 import { SessionsService } from '../../sessions/application/sessions.service';
 import { ConfigService } from '@nestjs/config';
+import { CreateUserUseCase } from '../../../modules/users/application/useCases';
 
 @Injectable()
 export class AuthService {
@@ -13,7 +14,8 @@ export class AuthService {
     constructor(private readonly usersService: UsersService,
                 private readonly jwtService: JwtService,
                 private readonly sessionsService: SessionsService,
-                private readonly configService: ConfigService) {}
+                private readonly configService: ConfigService,
+                private readonly createUserUseCase: CreateUserUseCase) {}
 
     async decodeToken(token: string) {
         try {
@@ -25,11 +27,6 @@ export class AuthService {
             console.log(err)
             throw new UnauthorizedException()
         }
-    }
-
-    async updateRefreshToken(user, tokens: Tokens) {
-        const hashToken = await hash(tokens.refresh_token, 10)
-        await this.usersService.createUser({...user, refresh_token: hashToken})
     }
 
     async generateToken(user: RegisterUserViewModel) {
@@ -50,11 +47,16 @@ export class AuthService {
         }
     }
 
-    async checkToken(token: string): Promise<void> {
+    async checkTokenInDataBase(token: string): Promise<void> {
         const hasToken = await this.sessionsService.findUsedToken(token)
         if (hasToken) {
             throw new UnauthorizedException()
         }
+    }
+
+    async updateRefreshTokenInDataBase(user, tokens: Tokens) {
+        const hashToken = await hash(tokens.refresh_token, 10)
+        await this.createUserUseCase.execute({...user, refresh_token: hashToken})
     }
 
 }

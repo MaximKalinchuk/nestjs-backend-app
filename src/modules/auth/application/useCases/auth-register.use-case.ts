@@ -4,12 +4,14 @@ import { RegisterUserInputModel } from "../../api/models/registerUser.model";
 import { Tokens } from "../dto/tokens-view-model.dto";
 import { hash } from 'bcryptjs';
 import { AuthService } from '../auth.service';
+import { CreateUserUseCase } from "../../../../modules/users/application/useCases";
 
 
 @Injectable()
 export class AuthRegisterUseCase {
     constructor(private readonly usersService: UsersService,
-                private readonly authService: AuthService) {}
+                private readonly authService: AuthService,
+                private readonly createUserUseCase: CreateUserUseCase) {}
 
     async execute(userData: RegisterUserInputModel): Promise<Tokens> {
 
@@ -25,11 +27,11 @@ export class AuthRegisterUseCase {
         }
 
         const hashPassword = await hash(userData.password, 5)
-        const user = await this.usersService.createUser({...userData, password: hashPassword})
+        const user = await this.createUserUseCase.execute({...userData, password: hashPassword})
 
         const tokens = await this.authService.generateToken(user)
 
-        this.authService.updateRefreshToken(user, tokens)
+        this.authService.updateRefreshTokenInDataBase(user, tokens)
 
         return tokens;
     }
