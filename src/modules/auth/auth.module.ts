@@ -4,14 +4,23 @@ import { AuthController } from './api/auth.controller';
 import { JwtModule } from '@nestjs/jwt';
 import { UsersModule } from '../users/users.module';
 import { SessionsModule } from '../sessions/sessions.module';
+import { AuthLoginUseCase, AuthLogoutUseCase, AuthRefreshUseCase, AuthRegisterUseCase } from './application/useCases';
+
+const useCases = [
+  AuthLoginUseCase,
+  AuthLogoutUseCase,
+  AuthRefreshUseCase,
+  AuthRegisterUseCase,
+]
+
 @Module({
-  providers: [AuthService],
-  controllers: [AuthController],
   imports: [
     SessionsModule,
     UsersModule, 
     JwtModule.register({})
 ],
+  controllers: [AuthController],
+  providers: [AuthService, ...useCases],
   exports: [JwtModule, AuthService],
 })
 export class AuthModule {}
