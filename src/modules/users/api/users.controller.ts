@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post, UseGuards, HttpCode } from '@nestjs/common';
+import { Body, Controller, Get, Post, UseGuards, HttpCode, Req } from '@nestjs/common';
 import { Roles } from '../../../common/decorators/roles.decorator';
 import { CreateUserViewModel } from '../application/dto/createUser-view-model.dto';
 import { UsersService } from '../application/users.service';
@@ -10,6 +10,7 @@ import { CreateUserUseCase } from '../application/useCases/createUser.use-case';
 import { GiveBanUseCase } from '../application/useCases/giveBan.use-case';
 import { GiveRoleUseCase } from '../application/useCases/giveRole.use-case';
 import { GetUsersUseCase } from '../application/useCases/getUsers.use-case';
+import { Request } from 'express';
 
 
 @Controller('users')
@@ -27,8 +28,9 @@ export class UsersController {
 
     @HttpCode(200)
     @Get()
-    async getUsers(): Promise<CreateUserViewModel[]> {
-        return await this.getUsersUseCase.execute()
+    async getUsers(@Req() req: Request): Promise<CreateUserViewModel[]> {
+        const refresh_token = req.cookies.refresh_token
+        return await this.getUsersUseCase.execute(refresh_token)
     }
 
     @HttpCode(200)

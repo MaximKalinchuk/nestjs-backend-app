@@ -15,13 +15,13 @@ export class AuthLogoutUseCase {
     async execute(token: string): Promise<void> {
         await this.authService.checkTokenInDataBase(token)
         const userFromRequest = await this.authService.decodeToken(token)
-        const user = await this.usersRepository.getUserWithRolesById(userFromRequest.id);
+        const user = await this.usersRepository.getUserWithRolesById(userFromRequest.payload.id);
         if (!user) {
             throw new UnauthorizedException('Такого пользователя не существует')
         }
 
         const userWithoutRefreshToken = { ...user, refresh_token: null}
-        await this.usersService.updateRefreshUser(userWithoutRefreshToken)
+        await this.usersService.updateUserInDataBase(userWithoutRefreshToken)
         await this.sessionsService.saveUsedToken(token)
     }
 }

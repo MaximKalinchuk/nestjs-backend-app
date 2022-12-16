@@ -15,8 +15,9 @@ export class AuthRefreshUseCase {
 
     async execute(token: string): Promise<Tokens> {
         await this.authService.checkTokenInDataBase(token)
+        
         const userFromRequest = await this.authService.decodeToken(token)
-        const user = await this.usersRepository.getUserWithRolesById(userFromRequest.id);
+        const user = await this.usersRepository.getUserWithRolesById(userFromRequest.payload.id);
         
 
         if (!user) {
@@ -28,7 +29,6 @@ export class AuthRefreshUseCase {
         if(!isRefreshTokensEquel) {
             throw new UnauthorizedException('Токены не совпадают')
         }
-
         const tokens = await this.authService.generateToken(user);
 
         await this.authService.updateRefreshTokenInDataBase(user, tokens)

@@ -7,6 +7,7 @@ import { Tokens } from './dto/tokens-view-model.dto';
 import { SessionsService } from '../../sessions/application/sessions.service';
 import { ConfigService } from '@nestjs/config';
 import { CreateUserUseCase } from '../../../modules/users/application/useCases';
+import { UsersRepository } from 'src/modules/users/infrastructure/users.repository';
 
 @Injectable()
 export class AuthService {
@@ -14,8 +15,7 @@ export class AuthService {
     constructor(private readonly usersService: UsersService,
                 private readonly jwtService: JwtService,
                 private readonly sessionsService: SessionsService,
-                private readonly configService: ConfigService,
-                private readonly createUserUseCase: CreateUserUseCase) {}
+                private readonly configService: ConfigService) {}
 
     async decodeToken(token: string) {
         try {
@@ -56,7 +56,7 @@ export class AuthService {
 
     async updateRefreshTokenInDataBase(user, tokens: Tokens) {
         const hashToken = await hash(tokens.refresh_token, 10)
-        await this.createUserUseCase.execute({...user, refresh_token: hashToken})
+        await this.usersService.updateUserInDataBase({...user, refresh_token: hashToken})
     }
 
 }

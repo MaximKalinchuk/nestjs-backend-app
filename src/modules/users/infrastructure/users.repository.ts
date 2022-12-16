@@ -24,6 +24,10 @@ export class UsersRepository {
         return await this.usersRepository.save(userData)   
     }
 
+    async updateUserInDataBase(userData: UsersEntity): Promise<UsersEntity> {
+        return await this.usersRepository.save(userData)
+    }
+
     async getUsers(): Promise<UsersEntity[]> {
         return await this.usersRepository.find({relations: ['userRoles']})
     }

@@ -1,9 +1,10 @@
 import { INestApplication, ValidationPipe } from '@nestjs/common';
 import * as request from 'supertest';
-import { truncateDBTables } from './utils/sql-func.utils';
+import { dataBaseSeed, truncateDBTables } from './utils/sql-func.utils';
 import { CreateUserInputModel } from '../src/modules/users/api/models/createUser.model';
 import { getAppForE2ETesting } from './utils/connect.utils';
 import { responseHeadersAuth } from './utils/get-token-from-response';
+import { decodeToken } from './utils/decode-token';
 
 describe('AuthController (e2e)', () => {
   let app: INestApplication;
@@ -13,18 +14,19 @@ describe('AuthController (e2e)', () => {
   });
 
   afterAll(async () => {
-    await truncateDBTables(app);
     await app.close();
   });
+
+  let access_token_user;
+  let refresh_token_user
 
   describe('Registration | Login | Refresh | Logout', () => {
 
     beforeAll(async () => {
       await truncateDBTables(app)
+      await dataBaseSeed(app)
     });
-
-    let access_token_user;
-    let refresh_token_user;
+;
 
     it('/register = should return new access token [POST -> 201]', async () => {
 
@@ -50,6 +52,7 @@ describe('AuthController (e2e)', () => {
       );
       access_token_user = access_token
       refresh_token_user = refresh_token
+
     })
 
     it('/login = should return new access and refresh tokens [POST -> 200]', async () => {
@@ -73,16 +76,20 @@ describe('AuthController (e2e)', () => {
          expect(refresh_token).toMatch(
            /^[A-Za-z0-9-_=]+\.[A-Za-z0-9-_=]+\.?[A-Za-z0-9-_.+/=]*$/,
          );
+
+         const decodeUser: any = await decodeToken(refresh_token)
+         const userHasAnyRolesExceptUser = decodeUser.payload.roles.some((role) => role.role !== "USER")
+         expect(userHasAnyRolesExceptUser).toEqual(false)
+         
    
          access_token_user = access_token
          refresh_token_user = refresh_token
 
-         await new Promise(resolve => setTimeout(resolve, 3000)); // делаю задержку перед следующим тестом из-за функции generateToken. При быстрой повторной отправки токены генерируются одинаковые!
+         await new Promise(resolve => setTimeout(resolve, 3000)); // делаю задержку перед следующим тестом из-за функции generateToken. При быстром повторном вызове функции в refresh - токены генерируются одинаковые!
 
      });
 
      it('/refresh = should return new access and refresh tokens [POST -> 200]', async () => {
-
 
         const response = await request(app.getHttpServer())
         .post('/refresh')
@@ -99,14 +106,18 @@ describe('AuthController (e2e)', () => {
         expect(access_token).not.toEqual(access_token_user)
         expect(refresh_token).not.toEqual(refresh_token_user)
 
-    
+        const decodeUser: any = await decodeToken(refresh_token)
+        const userHasAnyRolesExceptUser = decodeUser.payload.roles.some((role) => role.role !== "USER") // проверяем есть ли по мимо роли Юзера, другие роли (Проверка, что это не Админ)
+        expect(userHasAnyRolesExceptUser).toEqual(false)
+
+        
         access_token_user = access_token
         refresh_token_user = refresh_token
 
     });
 
      it('/logout = should return string [POST -> 200]', async () => {
-      const response = await request(app.getHttpServer())
+      await request(app.getHttpServer())
       .post('/logout')
       .set('Cookie', refresh_token_user)
       .expect(200)
@@ -170,37 +181,36 @@ describe('AuthController (e2e)', () => {
 /* -----------------------------------------------------------------------------------------  */
 /* -----------------------------------------------------------------------------------------  */
 /* -----------------------------------------------------------------------------------------  */
-  describe('Registration new User | GiveBan to new User | GiveRole to new User', () => {
+  describe('Admin login | Get All Users | GiveBan to new User | GiveRole to new User', () => {
 
-    const requestRegisterUser: CreateUserInputModel = {
-      username: "alex",
-      email: "alex@mail.ru",
-      password: "123"
-    }
+    it('/login = should return new access and refresh tokens [POST -> 200]', async () => {
 
+      const requestLoginUser = {
+        email: "admin@mail.ru",
+        password: "123"
+      } 
 
-    let access_token_user;
-    let refresh_token_user;
-
-    it('/register = should return new access token [POST -> 201]', async () => {
       const response = await request(app.getHttpServer())
-      .post('/register')
-      .send(requestRegisterUser)
-      .expect(201)
+         .post('/login')
+         .send(requestLoginUser)
+         .expect(200)
+         
 
+         const { access_token, refresh_token } = responseHeadersAuth(response);
+ 
+         expect(access_token).toMatch(
+           /^[A-Za-z0-9-_=]+\.[A-Za-z0-9-_=]+\.?[A-Za-z0-9-_.+/=]*$/,
+         );
+         expect(refresh_token).toMatch(
+           /^[A-Za-z0-9-_=]+\.[A-Za-z0-9-_=]+\.?[A-Za-z0-9-_.+/=]*$/,
+         );
 
-      const { access_token, refresh_token } = responseHeadersAuth(response);
+        //  const decodeUser: any = await decodeToken(refresh_token)
 
-      expect(access_token).toMatch(
-        /^[A-Za-z0-9-_=]+\.[A-Za-z0-9-_=]+\.?[A-Za-z0-9-_.+/=]*$/,
-      );
-      expect(refresh_token).toMatch(
-        /^[A-Za-z0-9-_=]+\.[A-Za-z0-9-_=]+\.?[A-Za-z0-9-_.+/=]*$/,
-      );
-      access_token_user = access_token
-      refresh_token_user = refresh_token
+         access_token_user = access_token
+         refresh_token_user = refresh_token
 
-    })
+     });
 
      it('/users = should return all users [POST -> 200]', async () => {
 
@@ -215,10 +225,30 @@ describe('AuthController (e2e)', () => {
 
     });
 
+    it('/users/role = should return user with new role  [POST -> 200]', async () => {
+
+      const RoleInputData = {
+        username: 'max',
+        rolename: 'MODER'
+      }
+
+      const response = await request(app.getHttpServer())
+      .post('/users/role')
+      .set('Cookie', refresh_token_user)
+      .set('Authorization', `Bearer ${access_token_user}`)
+      .send(RoleInputData)
+      .expect(200)
+
+      const user = response.body
+      const userHasRole = user.userRoles.some((role) => role.role === 'MODER')
+      expect(userHasRole).toEqual(true)
+
+    });
+
     it('/users/ban = should return user with ban = true [POST -> 200]', async () => {
 
       const BanInputData = {
-        username: 'alex',
+        username: 'max',
         BanReason: 'Плохой человек'
       }
 
@@ -234,24 +264,5 @@ describe('AuthController (e2e)', () => {
 
   });
 
-    it('/users/role = should return user with new role  [POST -> 200]', async () => {
-
-      const RoleInputData = {
-        username: 'alex',
-        BanReason: 'MODER'
-      }
-
-      const response = await request(app.getHttpServer())
-      .post('/users/role')
-      .set('Cookie', refresh_token_user)
-      .set('Authorization', `Bearer ${access_token_user}`)
-      .send(RoleInputData)
-      .expect(200)
-
-      const user = response.body
-      expect(user.userRoles.role).toEqual('MODER')
-
-    });
   })
 })
-
