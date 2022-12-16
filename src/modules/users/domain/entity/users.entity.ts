@@ -19,16 +19,16 @@ export class UsersEntity {
     @Column({default: false})
     banned: boolean;
 
-    @Column({default: ''})
+    @Column({default: '', nullable: true})
     BanReason: string;
 
-    @Column({default: null})
+    @Column({default: null, nullable: true})
     refresh_token: string | null;
 
-    @Column({type: 'timestamp', default: () => 'CURRENT_TIMESTAMP'})
+    @Column({type: 'timestamp', default: () => 'CURRENT_TIMESTAMP', nullable: true})
     createdAt: Date;
 
-    @Column({type: 'timestamp', default: () => 'CURRENT_TIMESTAMP'})
+    @Column({type: 'timestamp', default: () => 'CURRENT_TIMESTAMP', nullable: true})
     updatedAt: Date;
 
     @ManyToMany(() => RolesEntity)

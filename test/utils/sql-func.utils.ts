@@ -25,11 +25,35 @@ SELECT truncate_tables('postgres');
 
 }
 
-// export async function getAllUsers(
-//   app: INestApplication,
-// ) {
-//   const dataSource = await app.resolve(DataSource);
-//   return await dataSource.query(`
-//   SELECT *
-// 	FROM "users";`);
-// }
+export async function dataBaseSeed(app: INestApplication) {
+    const dataSource = await app.resolve(DataSource);
+  await dataSource.query(
+    `INSERT INTO roles (role, description) 
+    VALUES 
+    ('ADMIN', 'Администратор'), 
+    ('USER', 'Пользователь'),
+    ('MODER', 'Модератор')
+    `,
+  );
+
+//   await dataSource.query(
+//     `INSERT INTO users (username, email, password, banned, "BanReason", refresh_token) 
+//     VALUES 
+//     ('admin', 'admin@mail.ru', '$2a$05$b3PdP9IUTqw9IKUcDnVtCu3SbI8OmFHJFnsX14dRExP9OCc0g4Cd.', 'false', '', '$2a$10$S3n0RWFYcYii7aLkdb6hL.DfJDul0Fd/mSGkbmxW0billtV41Wskq')
+//     `,
+//   );
+
+//   await dataSource.query(
+//     `INSERT INTO users (username, email, password, banned, "BanReason", refresh_token) 
+//     VALUES 
+//     ('admin', 'admin@mail.ru', '$2a$05$b3PdP9IUTqw9IKUcDnVtCu3SbI8OmFHJFnsX14dRExP9OCc0g4Cd.', 'false', '', '$2a$10$S3n0RWFYcYii7aLkdb6hL.DfJDul0Fd/mSGkbmxW0billtV41Wskq')
+//     `,
+//   );
+
+//   await dataSource.query(
+//     `INSERT INTO users_user_roles_roles ("usersId", "rolesId") 
+//     VALUES 
+//     ('1', '1')
+//     `,
+//   );
+}

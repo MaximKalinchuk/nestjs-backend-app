@@ -1,4 +1,4 @@
-import { Body, Controller, Post, Req, Res } from '@nestjs/common';
+import { Body, Controller, HttpCode, Post, Req, Res } from '@nestjs/common';
 import { Response, Request } from 'express';
 import { AuthService } from '../application/auth.service';
 import { Tokens } from '../application/dto/tokens-view-model.dto';
@@ -17,6 +17,7 @@ export class AuthController {
                 private readonly authRegisterUseCase: AuthRegisterUseCase,) {}
 
     @Public()
+    @HttpCode(201)
     @Post('register')
     async register(@Body() userData: RegisterUserInputModel, @Res({passthrough: true}) res: Response): Promise<Omit<Tokens, "refresh_token">> {
         const tokens = await this.authRegisterUseCase.execute(userData)
@@ -30,6 +31,7 @@ export class AuthController {
     }
 
     @Public()
+    @HttpCode(200)
     @Post('login')
     async login(@Body() userData: LoginUserInputModel, @Res({passthrough: true}) res: Response): Promise<Omit<Tokens, "refresh_token">> {
         const tokens = await this.authLoginUseCase.execute(userData)
@@ -44,6 +46,7 @@ export class AuthController {
 
 
     @Public()
+    @HttpCode(200)
     @Post('refresh')
     async refresh(@Req() req: Request, @Res({passthrough: true}) res: Response): Promise<Omit<Tokens, "refresh_token">> {
         const refresh_token = req.cookies.refresh_token
@@ -59,6 +62,7 @@ export class AuthController {
 
     
     @Public()
+    @HttpCode(200)
     @Post('logout')
     async logout(@Req() req: Request, @Res({passthrough: true}) res: Response): Promise<string> {
         const refresh_token = req.cookies.refresh_token

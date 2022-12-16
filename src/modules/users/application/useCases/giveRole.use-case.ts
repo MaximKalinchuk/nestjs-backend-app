@@ -12,7 +12,7 @@ export class GiveRoleUseCase {
                 private readonly usersService: UsersService) {}
 
     async execute(userData: giveRoleToUserInputModel): Promise<CreateUserViewModel> {
-        const user = await this.usersRepository.getUserWithRolesById(userData.id);
+        const user = await this.usersRepository.getUserByUsername(userData.username);
         const role = await this.rolesRepository.getRoleByName(userData.rolename);
 
         if(!user) {

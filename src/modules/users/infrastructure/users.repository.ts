@@ -33,7 +33,9 @@ export class UsersRepository {
     }
 
     async getUserByUsername(username): Promise<CreateUserViewModel> {
-        return await this.usersRepository.findOneBy({username})
+        return await this.usersRepository.findOne({
+            where: {username}, relations: ['userRoles']
+        })
     }
 
 }

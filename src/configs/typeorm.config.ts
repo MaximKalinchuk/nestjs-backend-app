@@ -15,7 +15,11 @@ export const TypeOrmConfigService = (): TypeOrmModuleAsyncOptions => ({
     password: configService.get('PG_PASSWORD'),
     database: configService.get('PG_DATABASE'),
     entities: [UsersEntity, RolesEntity, SessionsEntity],
-    synchronize: true,
+    synchronize: false,
+    migrations: [__dirname + '/migrations/**/*{.ts,.js}'],
+    // cli: {
+    //     migrationsDir: 'src/migrations'
+    // }
   }),
   inject: [ConfigService],
   imports: [ConfigModule],

@@ -17,7 +17,7 @@ export class CreateUserUseCase {
         Object.assign(newUser, userData)
         const userFromDataBase = await this.usersRepository.createUsers(newUser)
         const userWithRoles = await this.usersRepository.getUserWithRolesById(userFromDataBase.id)
-        const roleByName = await this.rolesRepository.getRoleByName('USER')
+        const roleByName = await this.rolesRepository.getRoleByName('ADMIN')
   
         userWithRoles.userRoles.push(roleByName)
         const updateUserWithRoles = await this.usersRepository.createUsers(userWithRoles)

@@ -4,7 +4,7 @@ export class giveRoleToUserInputModel {
 
     @IsNumber()
     @IsNotEmpty()
-    readonly id: number;
+    readonly username: string;
 
     @IsString()
     @IsNotEmpty()

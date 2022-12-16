@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Post, UseGuards, HttpCode } from '@nestjs/common';
 import { Roles } from '../../../common/decorators/roles.decorator';
 import { CreateUserViewModel } from '../application/dto/createUser-view-model.dto';
 import { UsersService } from '../application/users.service';
@@ -19,17 +19,19 @@ export class UsersController {
                 private readonly giveBanUseCase: GiveBanUseCase,
                 private readonly giveRoleUseCase: GiveRoleUseCase,
                 private readonly getUsersUseCase: GetUsersUseCase) {}
-
+    @HttpCode(201)
     @Post()
     async createUser(@Body() userData: CreateUserInputModel): Promise<CreateUserViewModel>{
         return await this.createUserUseCase.execute(userData)
     }
 
+    @HttpCode(200)
     @Get()
     async getUsers(): Promise<CreateUserViewModel[]> {
         return await this.getUsersUseCase.execute()
     }
 
+    @HttpCode(200)
     @UseGuards(RolesGuard)
     @Roles('ADMIN')
     @Post('/ban')
@@ -37,6 +39,7 @@ export class UsersController {
         return await this.giveBanUseCase.execute(userData)
     }
 
+    @HttpCode(200)
     @UseGuards(RolesGuard)
     @Roles('ADMIN')
     @Post('/role')
