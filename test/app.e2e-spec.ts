@@ -1,10 +1,11 @@
-import { INestApplication, ValidationPipe } from '@nestjs/common';
+import { INestApplication } from '@nestjs/common';
 import * as request from 'supertest';
 import { dataBaseSeed, truncateDBTables } from './utils/sql-func.utils';
 import { CreateUserInputModel } from '../src/modules/users/api/models/createUser.model';
 import { getAppForE2ETesting } from './utils/connect.utils';
-import { responseHeadersAuth } from './utils/get-token-from-response';
-import { decodeToken } from './utils/decode-token';
+import { responseHeadersAuth } from './utils/utils-functions/get-token-from-response';
+import { decodeToken } from './utils/utils-functions/decode-token';
+import { LoginUserInputModel } from 'src/modules/auth/api/models/loginUser.model';
 
 describe('AuthController (e2e)', () => {
   let app: INestApplication;
@@ -117,6 +118,7 @@ describe('AuthController (e2e)', () => {
     });
 
      it('/logout = should return string [POST -> 200]', async () => {
+
       await request(app.getHttpServer())
       .post('/logout')
       .set('Cookie', refresh_token_user)
@@ -126,7 +128,7 @@ describe('AuthController (e2e)', () => {
     });
 
     describe('register - Bad requests', () => {
-      it('Bad /register = should return error messeges [POST -> 400]', async () => {
+      it('Wrong email /register = should return error messeges [POST -> 400]', async () => {
       
         const badRequestRegisterUser: CreateUserInputModel = {
           username: "max1",
@@ -162,19 +164,85 @@ describe('AuthController (e2e)', () => {
     })
 
     describe('login - Bad requests', () => {
-      it('Bad /login = should return Unauthorized [POST -> 401]', async () => {
+      it('Wrong user /login = should return Unauthorized [POST -> 401]', async () => {
 
-        const badRequestLoginUser = {
+        const badRequestLoginUser: LoginUserInputModel = {
           email: "maxa@mail.ru",
           password: "123"
         } 
+
+        const result = "Такого пользователя не существует"
   
         const response = await request(app.getHttpServer())
            .post('/login')
            .send(badRequestLoginUser)
            .expect(401)
   
+           const message = response.body.message
+           expect(message).toEqual(result)
        });
+
+       it('Wrong email /login = should return Bad Request [POST -> 400]', async () => {
+
+        const badRequestLoginUser: LoginUserInputModel = {
+          email: "maxamail.ru",
+          password: "123"
+        } 
+
+        const result = 'email must be an email'
+  
+        const response = await request(app.getHttpServer())
+           .post('/login')
+           .send(badRequestLoginUser)
+           .expect(400)
+  
+           const message = response.body.message[0]
+           expect(message).toEqual(result)
+       });
+
+       it('Wrong pass /login = should return Unauthorized [POST -> 401]', async () => {
+
+        const badRequestLoginUser: LoginUserInputModel = {
+          email: "max@mail.ru",
+          password: '1234'
+        }
+
+        const result = 'Неверный пароль'
+  
+        const response = await request(app.getHttpServer())
+           .post('/login')
+           .send(badRequestLoginUser)
+           .expect(401)
+
+           const message = response.body.message
+           expect(message).toEqual(result)
+       });
+    })
+
+    describe('refresh - Bad requests', () => {
+      it('Wrong refresh /refresh = should return Unauthorized [POST -> 401]', async () => {
+
+        const bad_refresh_token_user = 'asdfasf'
+
+          await request(app.getHttpServer())
+          .post('/refresh')
+          .set('Cookie', bad_refresh_token_user)
+          .expect(401)
+
+        }); 
+    })
+
+    describe('logout - Bad requests', () => {
+      it('Wrong refresh /logout = should return Unauthorized [POST -> 401]', async () => {
+
+        const bad_refresh_token_user = 'asdfasf'
+        
+        await request(app.getHttpServer())
+        .post('/logout')
+        .set('Cookie', bad_refresh_token_user)
+        .expect(401)
+  
+      });
     })
 
   })

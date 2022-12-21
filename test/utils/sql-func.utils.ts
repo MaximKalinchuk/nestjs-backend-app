@@ -42,13 +42,6 @@ export async function dataBaseSeed(app: INestApplication) {
     `,
   );
 
-//   await dataSource.query(
-//     `INSERT INTO users (username, email, password, banned, "BanReason", refresh_token) 
-//     VALUES 
-//     ('admin', 'admin@mail.ru', '$2a$05$b3PdP9IUTqw9IKUcDnVtCu3SbI8OmFHJFnsX14dRExP9OCc0g4Cd.', 'false', '', '$2a$10$S3n0RWFYcYii7aLkdb6hL.DfJDul0Fd/mSGkbmxW0billtV41Wskq')
-//     `,
-//   );
-
   await dataSource.query(
     `INSERT INTO users_user_roles_roles ("usersId", "rolesId") 
     VALUES 
