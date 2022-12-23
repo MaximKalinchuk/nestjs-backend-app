@@ -22,5 +22,5 @@ export const TypeOrmConfigService = (): TypeOrmModuleAsyncOptions => ({
     // }
   }),
   inject: [ConfigService],
-  imports: [ConfigModule],
+  imports: [],
 });

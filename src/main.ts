@@ -2,6 +2,8 @@ import { ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './modules/app.module';
 import * as cookieParser from 'cookie-parser';
+import { DocumentBuilder } from '@nestjs/swagger';
+import { SwaggerModule } from '@nestjs/swagger/dist';
 
 async function start() {
 
@@ -22,6 +24,15 @@ async function start() {
       },
     }),
   );
+
+  const config = new DocumentBuilder()
+  .setTitle('NestJS-Backend-App')
+  .setDescription('Документация проекта')
+  .setVersion('1.0.0')
+  .build()
+
+  const document = SwaggerModule.createDocument(app, config)
+  SwaggerModule.setup('/api/docs', app, document)
 
   await app.listen(PORT, () => console.log(`Server was started on ${PORT} port ;)`));
 }

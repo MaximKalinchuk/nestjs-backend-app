@@ -123,7 +123,7 @@ describe('AuthController (e2e)', () => {
       .post('/logout')
       .set('Cookie', refresh_token_user)
       .expect(200)
-      .expect('Вы успешно вышли из системы.')
+      .expect({ message:"Вы успешно вышли из системы."  })
 
     });
 
