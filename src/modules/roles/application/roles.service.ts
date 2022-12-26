@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { RolesRepository } from '../intarface/roles.repository';
+import { RolesRepository } from '../infrastructure/roles.repository';
 
 
 @Injectable()

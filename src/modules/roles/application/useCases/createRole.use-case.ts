@@ -1,7 +1,7 @@
 import { HttpException, HttpStatus, Injectable } from "@nestjs/common";
 import { CreateRoleInputModel } from "../../api/models/createRole.model";
 import { RolesEntity } from "../../domain/entity/roles.entity";
-import { RolesRepository } from "../../intarface/roles.repository";
+import { RolesRepository } from "../../infrastructure/roles.repository";
 import { CreateRoleViewModel } from "../dto/createRole-view-model.dto";
 
 

@@ -8,8 +8,7 @@ import { CreateRoleInputModel } from './models/createRole.model';
 @Controller('roles')
 export class RolesController {
 
-    constructor(private readonly rolesServics: RolesService,
-                private readonly createRoleUseCase: CreateRoleUseCase) {}
+    constructor(private readonly createRoleUseCase: CreateRoleUseCase) {}
                 
     @ApiExcludeEndpoint()            
     @Post()

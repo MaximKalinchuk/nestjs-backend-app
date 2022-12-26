@@ -1,5 +1,5 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
-import { RolesRepository } from '../../../../modules/roles/intarface/roles.repository';
+import { RolesRepository } from '../../../roles/infrastructure/roles.repository';
 import { giveRoleToUserInputModel } from '../../api/models/giveRoleToUser.model';
 import { UsersRepository } from '../../infrastructure/users.repository';
 import { CreateUserViewModel } from '../dto/createUser-view-model.dto';

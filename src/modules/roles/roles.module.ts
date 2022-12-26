@@ -3,7 +3,7 @@ import { RolesService } from './application/roles.service';
 import { RolesController } from './api/roles.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { RolesEntity } from './domain/entity/roles.entity';
-import { RolesRepository } from './intarface/roles.repository';
+import { RolesRepository } from './infrastructure/roles.repository';
 import { CreateRoleUseCase } from './application/useCases/createRole.use-case';
 
 const useCase = [

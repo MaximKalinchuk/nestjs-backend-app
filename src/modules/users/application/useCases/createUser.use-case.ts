@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { RolesRepository } from '../../../../modules/roles/intarface/roles.repository';
+import { RolesRepository } from '../../../roles/infrastructure/roles.repository';
 import { CreateUserInputModel } from '../../api/models/createUser.model';
 import { UsersEntity } from '../../domain/entity/users.entity';
 import { UsersRepository } from '../../infrastructure/users.repository';
